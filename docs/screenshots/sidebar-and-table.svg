@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-label="Sidebar and table placeholder">
+  <style>
+    .bg{fill:#F8FAFC}
+    .sidebar{fill:#030213}
+    .card{fill:white;stroke:#E2E8F0}
+    .title{fill:#0F172A;font-family:Inter,system-ui,Arial;font-size:18px;font-weight:600}
+    .text{fill:#64748B;font-family:Inter,system-ui,Arial;font-size:13px}
+  </style>
+  <rect class="bg" width="1200" height="700"/>
+  <rect class="sidebar" x="32" y="32" width="200" height="636" rx="10"/>
+  <text x="56" y="64" fill="#fff" font-family="Inter,system-ui" font-size="16">Main</text>
+  <g transform="translate(252,32)">
+    <rect class="card" width="900" height="120" rx="8"/>
+    <text x="16" y="36" class="title">File processing table</text>
+    <g transform="translate(16,56)">
+      <rect x="0" y="0" width="868" height="28" fill="#F3F4F6" rx="4"/>
+      <text x="8" y="18" class="text">Row 1 — file_123.csv — Validated</text>
+      <rect x="0" y="36" width="868" height="28" fill="#fff" rx="4"/>
+      <text x="8" y="54" class="text">Row 2 — file_456.csv — Errors</text>
+    </g>
+  </g>
+</svg>
