@@ -13,7 +13,8 @@ const C = {
   bg: "var(--c-bg)", surface: "var(--c-surface)", border: "var(--c-border)",
   borderMed: "var(--c-border-med)",
   cardSubtle: "var(--c-card-subtle)", iconInactive: "var(--c-icon-inactive)", subtle: "var(--c-subtle)",
-  em: "#10B981", emDim: "rgba(16,185,129,0.12)", emGlow: "rgba(16,185,129,0.35)",
+  em: "#10B981", emDim: "rgba(16,185,129,0.12)", emGlow: "var(--c-em-glow)",
+  glassBg: "var(--c-glass-bg)", glassBorder: "var(--c-glass-border)",
   text: "var(--c-text)", sub: "var(--c-sub)", muted: "var(--c-muted)",
   err: "#EF4444", errDim: "rgba(239,68,68,0.1)",
   warn: "#F59E0B", warnDim: "rgba(245,158,11,0.1)",
@@ -98,7 +99,7 @@ const FILE_ERRORS: Record<string, ErrorEntry[]> = {
     { id: "e7", errorId: "VAL-501", snipLevel: 2, severity: "error", loop: "CLM Loop", segment: "CLM", element: "CLM02", position: "24:2", lineNumber: 24, message: "Total Charge Amount — Non-numeric or zero value", expected: "Positive decimal value (e.g. 150.00)", actual: "0.00", ruleRef: "X12-837P-CLM02-V", aiExplanation: "CLM02 contains a zero charge amount, which is not valid for a professional claim. This indicates either a calculation error in the billing system or the claim was submitted before charges were finalized.", remediation: "Verify that charges are calculated and finalized before EDI generation. Add a guard clause to reject claims with zero total charge amounts." },
     { id: "e8", errorId: "VAL-602", snipLevel: 2, severity: "error", loop: "SV1 Loop", segment: "SV1", element: "SV102", position: "52:2", lineNumber: 52, message: "Service Line Charge Amount Invalid", expected: "Positive decimal, max 18 chars", actual: "EMPTY", ruleRef: "X12-837P-SV102-R", aiExplanation: "The service line charge amount is missing from SV1. Each service line must carry a charge for proper adjudication. This usually indicates a line-item extraction failure in the billing interface.", remediation: "Review the SV1 segment generation logic. Ensure each service line has a corresponding charge extracted from the source billing system." },
     { id: "e9", errorId: "VAL-701", snipLevel: 3, severity: "error", loop: "DTP Loop", segment: "DTP", element: "DTP03", position: "38:3", lineNumber: 38, message: "Service Date Format Invalid", expected: "CCYYMMDD (8-digit date, qualifier 472)", actual: "2026/03/16 (slash-delimited)", ruleRef: "X12-837P-DTP03-FMT", aiExplanation: "The service date in DTP03 uses slash delimiters instead of the required CCYYMMDD format. This is a common issue when source systems use locale-formatted dates rather than X12-compliant date strings.", remediation: "Normalize all date values to CCYYMMDD format in your mapping logic before outputting to EDI. Strip any delimiters or locale-specific separators." },
-    { id: "e10", errorId: "VAL-802", snipLevel: 2, severity: "error", loop: "NM1 Loop", segment: "NM1", element: "NM109", position: "33:9", lineNumber: 33, message: "Provider NPI Invalid — must be 10-digit numeric", expected: "10-digit National Provider Identifier", actual: "12345 (5 chars)", ruleRef: "X12-837P-NM109-NPI", aiExplanation: "The provider NPI (NM109) has only 5 digits. A valid NPI must be exactly 10 digits. This indicates either a data entry error in the provider master file or a truncation issue during data extraction.", remediation: "Validate NPIs against the NPPES registry before submission. Add a 10-digit length check on NM109 in your pre-transmission validation suite." },
+    { id: "e10", errorId: "VAL-802", snipLevel: 2, severity: "error", loop: "NM1 Loop", segment: "NM1", element: "NM109", position: "33:9", lineNumber: 33, message: "Provider NPI Invalid ���� must be 10-digit numeric", expected: "10-digit National Provider Identifier", actual: "12345 (5 chars)", ruleRef: "X12-837P-NM109-NPI", aiExplanation: "The provider NPI (NM109) has only 5 digits. A valid NPI must be exactly 10 digits. This indicates either a data entry error in the provider master file or a truncation issue during data extraction.", remediation: "Validate NPIs against the NPPES registry before submission. Add a 10-digit length check on NM109 in your pre-transmission validation suite." },
     { id: "e11", errorId: "WAR-901", snipLevel: 1, severity: "warning", loop: "GS Loop", segment: "GS", element: "GS04", position: "8:4", lineNumber: 8, message: "Group Date Mismatch — GS04 differs from transaction dates by >30 days", expected: "Date within 30 days of transaction service dates", actual: "20250101 (dated 2025, transactions in 2026)", ruleRef: "X12-GS04-WARN", aiExplanation: "The functional group date (GS04) is significantly older than the transaction service dates. While not an outright rejection, this may trigger additional scrutiny or delay processing at the payer.", remediation: "Ensure GS04 reflects the actual batch generation date, not a static or hardcoded value. Use dynamic date generation in your EDI envelope builder." },
     { id: "e12", errorId: "WAR-902", snipLevel: 2, severity: "warning", loop: "CLM Loop", segment: "PWK", element: "PWK02", position: "47:2", lineNumber: 47, message: "Attachment Report Type Code — Deprecated code value", expected: "Current X12 PWK02 code set value", actual: "OZ (deprecated since 004010)", ruleRef: "X12-837P-PWK02-WARN", aiExplanation: "The PWK02 attachment report type uses 'OZ', a code that was valid in 004010 but deprecated in 005010. Most payers will still accept it but some may reject it.", remediation: "Update PWK02 to use the current 005010-compliant equivalent code. Review your code set tables against the current X12 publication." },
   ],
@@ -374,7 +375,7 @@ GE*1*1~
 IEA*1*000000298~`,
 };
 
-// ─── Inline EDI Editor (for Raw tab) ─────────────────────────────────────────
+// ─── Inline EDI Editor (for Raw tab) ───────��─────────────────────────────────
 function InlineEDIEditor({ fileId, fileName, errorLines }: { fileId: string; fileName: string; errorLines: Set<number> }) {
   const initial = FULL_EDI_CONTENT[fileId] || "// Raw EDI content not available for this file type.";
   const [content, setContent] = useState(initial);
@@ -431,7 +432,7 @@ function InlineEDIEditor({ fileId, fileName, errorLines }: { fileId: string; fil
   return (
     <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${C.em}30`, background: "#060C17" }}>
       {/* Toolbar */}
-      <div className="flex items-center gap-2 px-4 py-2.5" style={{ borderBottom: `1px solid ${C.border}`, background: "rgba(8,14,26,0.95)" }}>
+      <div className="flex items-center gap-2 px-4 py-2.5" style={{ borderBottom: `1px solid ${C.glassBorder}`, background: "rgba(7,12,24,0.95)" }}>
         <Terminal className="w-3.5 h-3.5" style={{ color: C.em }} />
         <span className="font-mono flex-1" style={{ color: C.sub, fontSize: "0.68rem" }}>{fileName} — Live Editor</span>
         <span className="font-mono" style={{ color: C.muted, fontSize: "0.62rem" }}>{lineCount} lines{parseMs !== null ? ` · ${parseMs}ms` : ""}</span>
@@ -439,7 +440,7 @@ function InlineEDIEditor({ fileId, fileName, errorLines }: { fileId: string; fil
         <button
           onClick={() => setShowHighlight(p => !p)}
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono"
-          style={{ background: showHighlight ? C.infoDim : C.iconInactive, border: `1px solid ${showHighlight ? `${C.info}35` : C.border}`, color: showHighlight ? C.info : C.muted, fontSize: "0.62rem", fontWeight: 700 }}
+          style={{ background: showHighlight ? C.infoDim : C.glassBg, border: `1px solid ${showHighlight ? `${C.info}35` : C.glassBorder}`, color: showHighlight ? C.info : C.muted, fontSize: "0.62rem", fontWeight: 700 }}
         >
           {showHighlight ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
           {showHighlight ? "HIGHLIGHT ON" : "HIGHLIGHT OFF"}
@@ -447,14 +448,14 @@ function InlineEDIEditor({ fileId, fileName, errorLines }: { fileId: string; fil
         <button
           onClick={() => { setContent(initial); setIsDirty(false); setParseMs(null); }}
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono"
-          style={{ background: C.iconInactive, border: `1px solid ${C.border}`, color: C.muted, fontSize: "0.62rem" }}
+          style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.muted, fontSize: "0.62rem" }}
         >
           <RotateCcw className="w-3 h-3" /> Reset
         </button>
         <button
           onClick={() => navigator.clipboard.writeText(content).catch(() => {})}
           className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono"
-          style={{ background: C.iconInactive, border: `1px solid ${C.border}`, color: C.muted, fontSize: "0.62rem" }}
+          style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.muted, fontSize: "0.62rem" }}
         >
           <Copy className="w-3 h-3" /> Copy
         </button>
@@ -471,7 +472,7 @@ function InlineEDIEditor({ fileId, fileName, errorLines }: { fileId: string; fil
       {/* Editor body */}
       <div className="flex" style={{ height: 340 }}>
         {/* Line numbers */}
-        <div className="select-none flex-shrink-0 overflow-hidden" style={{ width: 48, background: "rgba(0,0,0,0.35)", borderRight: `1px solid ${C.border}`, paddingTop: 10 }}>
+        <div className="select-none flex-shrink-0 overflow-hidden" style={{ width: 48, background: "rgba(5,9,20,0.7)", borderRight: `1px solid ${C.glassBorder}`, paddingTop: 10 }}>
           {Array.from({ length: lineCount }, (_, i) => {
             const ln = i + 1;
             const hasErr = errorLines.has(ln);
@@ -522,7 +523,7 @@ function InlineEDIEditor({ fileId, fileName, errorLines }: { fileId: string; fil
 
       {/* Error gutter */}
       {errorLines.size > 0 && (
-        <div className="px-4 py-2 flex items-center gap-3 flex-wrap" style={{ borderTop: `1px solid ${C.border}`, background: "rgba(239,68,68,0.04)" }}>
+        <div className="px-4 py-2 flex items-center gap-3 flex-wrap" style={{ borderTop: `1px solid ${C.glassBorder}`, background: "rgba(239,68,68,0.05)" }}>
           <AlertCircle className="w-3 h-3 flex-shrink-0" style={{ color: C.err }} />
           <span className="font-mono" style={{ color: C.err, fontSize: "0.62rem", fontWeight: 700 }}>{errorLines.size} error line{errorLines.size !== 1 ? "s" : ""} highlighted</span>
           <span style={{ color: C.muted, fontSize: "0.62rem" }}>— Red left border = validation error on that segment. Edit to fix and re-validate.</span>
@@ -538,8 +539,8 @@ function StatusPill({ status, size = "sm" }: { status: string; size?: "xs" | "sm
     passed: { bg: `${C.em}12`, border: `${C.em}35`, color: C.em, label: "PASSED" },
     failed: { bg: `${C.err}12`, border: `${C.err}35`, color: C.err, label: "FAILED" },
     warning: { bg: `${C.warn}12`, border: `${C.warn}35`, color: C.warn, label: "WARNING" },
-    "not-checked": { bg: C.iconInactive, border: C.border, color: C.muted, label: "NOT CHECKED" },
-  }[status] ?? { bg: C.iconInactive, border: C.border, color: C.muted, label: status.toUpperCase() };
+    "not-checked": { bg: C.glassBg, border: C.glassBorder, color: C.muted, label: "NOT CHECKED" },
+  }[status] ?? { bg: C.glassBg, border: C.glassBorder, color: C.muted, label: status.toUpperCase() };
 
   const pad = size === "xs" ? "2px 8px" : "3px 10px";
   return (
@@ -635,9 +636,9 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
   };
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${C.em}30`, background: "rgba(8,14,26,0.95)", backdropFilter: "blur(20px)" }}>
+    <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${C.em}30`, background: "rgba(8,14,26,0.95)" }}>
       {/* Panel header */}
-      <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${C.border}`, background: `${C.em}04` }}>
+      <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${C.glassBorder}`, background: "rgba(16,185,129,0.06)" }}>
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: C.emDim, border: `1px solid ${C.em}35` }}>
             <FileCode2 className="w-4 h-4" style={{ color: C.em }} />
@@ -657,7 +658,7 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-0 overflow-x-auto" style={{ borderBottom: `1px solid ${C.border}` }}>
+      <div className="flex gap-0 overflow-x-auto" style={{ borderBottom: `1px solid ${C.glassBorder}` }}>
         {TABS.map(t => (
           <button
             key={t.id}
@@ -680,7 +681,7 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
         <div className="p-5">
           <div className="grid grid-cols-3 gap-5 mb-5">
             {/* File metadata */}
-            <div className="col-span-1 p-4 rounded-xl space-y-3" style={{ background: C.cardSubtle, border: `1px solid ${C.border}` }}>
+            <div className="col-span-1 p-4 rounded-xl space-y-3" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}` }}>
               <div className="font-mono mb-3" style={{ color: C.em, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em" }}>FILE METADATA</div>
               {[
                 { label: "File Name", value: file.name },
@@ -703,7 +704,7 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
 
             {/* Validation summary */}
             <div className="col-span-1 space-y-3">
-              <div className="p-4 rounded-xl" style={{ background: C.cardSubtle, border: `1px solid ${C.border}` }}>
+              <div className="p-4 rounded-xl" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}` }}>
                 <div className="font-mono mb-3" style={{ color: C.em, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em" }}>VALIDATION SUMMARY</div>
                 <div className="grid grid-cols-2 gap-3">
                   {[
@@ -739,12 +740,12 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
             </div>
 
             {/* SNIP compliance */}
-            <div className="col-span-1 p-4 rounded-xl" style={{ background: C.cardSubtle, border: `1px solid ${C.border}` }}>
+            <div className="col-span-1 p-4 rounded-xl" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, backdropFilter: "blur(16px)" }}>
               <div className="font-mono mb-3" style={{ color: C.em, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em" }}>SNIP COMPLIANCE (1–7)</div>
               <div className="space-y-2">
                 {snipLevels.map(s => (
-                  <div key={s.level} className="flex items-center gap-2 p-2.5 rounded-lg" style={{ background: s.status === "failed" ? `${C.err}06` : C.cardSubtle, border: `1px solid ${s.status === "failed" ? `${C.err}20` : C.border}` }}>
-                    <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 font-mono" style={{ background: s.status === "failed" ? `${C.err}18` : s.status === "passed" ? `${C.em}12` : C.subtle, color: s.status === "failed" ? C.err : s.status === "passed" ? C.em : C.muted, fontSize: "0.65rem", fontWeight: 800 }}>
+                  <div key={s.level} className="flex items-center gap-2 p-2.5 rounded-lg" style={{ background: s.status === "failed" ? `${C.err}07` : C.glassBg, border: `1px solid ${s.status === "failed" ? `${C.err}25` : C.glassBorder}`, backdropFilter: "blur(8px)" }}>
+                    <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 font-mono" style={{ background: s.status === "failed" ? `${C.err}18` : s.status === "passed" ? `${C.em}12` : C.glassBg, color: s.status === "failed" ? C.err : s.status === "passed" ? C.em : C.muted, fontSize: "0.65rem", fontWeight: 800 }}>
                       {s.level}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -792,21 +793,21 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
         <div className="p-5">
           {/* Filters */}
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center gap-2 flex-1 px-3 py-2 rounded-xl" style={{ background: C.iconInactive, border: `1px solid ${C.border}` }}>
+            <div className="flex items-center gap-2 flex-1 px-3 py-2 rounded-xl" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, backdropFilter: "blur(12px)" }}>
               <Search className="w-3.5 h-3.5 flex-shrink-0" style={{ color: C.muted }} />
               <input type="text" placeholder="Search by ID, message, segment, element..." value={errSearch} onChange={e => setErrSearch(e.target.value)} className="flex-1 bg-transparent outline-none font-mono" style={{ color: C.text, fontSize: "0.78rem" }} />
               {errSearch && <button onClick={() => setErrSearch("")}><X className="w-3 h-3" style={{ color: C.muted }} /></button>}
             </div>
             <div className="flex gap-1.5">
               {(["all", "error", "warning"] as const).map(s => (
-                <button key={s} onClick={() => setErrSeverity(s)} className="px-3 py-2 rounded-lg font-mono transition-all" style={{ background: errSeverity === s ? (s === "error" ? C.errDim : s === "warning" ? C.warnDim : C.emDim) : C.iconInactive, border: `1px solid ${errSeverity === s ? (s === "error" ? `${C.err}35` : s === "warning" ? `${C.warn}35` : `${C.em}35`) : C.border}`, color: errSeverity === s ? (s === "error" ? C.err : s === "warning" ? C.warn : C.em) : C.muted, fontSize: "0.7rem", fontWeight: 700 }}>
+                <button key={s} onClick={() => setErrSeverity(s)} className="px-3 py-2 rounded-lg font-mono transition-all" style={{ background: errSeverity === s ? (s === "error" ? C.errDim : s === "warning" ? C.warnDim : C.emDim) : C.glassBg, border: `1px solid ${errSeverity === s ? (s === "error" ? `${C.err}35` : s === "warning" ? `${C.warn}35` : `${C.em}35`) : C.glassBorder}`, color: errSeverity === s ? (s === "error" ? C.err : s === "warning" ? C.warn : C.em) : C.muted, fontSize: "0.7rem", fontWeight: 700, backdropFilter: "blur(8px)" }}>
                   {s.toUpperCase()}
                 </button>
               ))}
             </div>
             <div className="flex gap-1.5">
               {(["all", 1, 2, 3, 4, 5, 6, 7] as const).map(s => (
-                <button key={s} onClick={() => setErrSnip(s)} className="px-2.5 py-2 rounded-lg font-mono transition-all" style={{ background: errSnip === s ? C.purpleDim : C.iconInactive, border: `1px solid ${errSnip === s ? `${C.purple}35` : C.border}`, color: errSnip === s ? C.purple : C.muted, fontSize: "0.68rem", fontWeight: 700 }}>
+                <button key={s} onClick={() => setErrSnip(s)} className="px-2.5 py-2 rounded-lg font-mono transition-all" style={{ background: errSnip === s ? C.purpleDim : C.glassBg, border: `1px solid ${errSnip === s ? `${C.purple}35` : C.glassBorder}`, color: errSnip === s ? C.purple : C.muted, fontSize: "0.68rem", fontWeight: 700, backdropFilter: "blur(8px)" }}>
                   {s === "all" ? "ALL" : `S${s}`}
                 </button>
               ))}
@@ -850,10 +851,10 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
             </div>
           </div>
 
-          <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
+          <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${C.glassBorder}` }}>
             <table className="w-full">
               <thead>
-                <tr style={{ background: C.cardSubtle, borderBottom: `1px solid ${C.border}` }}>
+                <tr style={{ background: C.glassBg, borderBottom: `1px solid ${C.glassBorder}` }}>
                   {["SET ID", "CONTROL #", "STATUS", "ERRORS", "WARNINGS", "SEGMENTS", "CLAIM #", "AMOUNT"].map(h => (
                     <th key={h} className="text-left py-3 px-4 font-mono" style={{ color: C.muted, fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em" }}>{h}</th>
                   ))}
@@ -861,7 +862,7 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
               </thead>
               <tbody>
                 {transactions.map((tx, i) => (
-                  <tr key={tx.id} style={{ borderBottom: i < transactions.length - 1 ? `1px solid ${C.border}` : "none", background: tx.status === "failed" ? `${C.err}04` : tx.status === "warning" ? `${C.warn}04` : undefined }}>
+                  <tr key={tx.id} style={{ borderBottom: i < transactions.length - 1 ? `1px solid ${C.glassBorder}` : "none", background: tx.status === "failed" ? `${C.err}04` : tx.status === "warning" ? `${C.warn}04` : undefined }}>
                     <td className="py-3 px-4">
                       <span className="font-mono" style={{ color: C.em, fontSize: "0.78rem", fontWeight: 700 }}>ST-{tx.setId}</span>
                     </td>
@@ -904,10 +905,10 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
             </div>
           ) : (
             <>
-              <div className="rounded-xl overflow-hidden mb-5" style={{ border: `1px solid ${C.border}` }}>
+              <div className="rounded-xl overflow-hidden mb-5" style={{ border: `1px solid ${C.glassBorder}` }}>
                 <table className="w-full">
                   <thead>
-                    <tr style={{ background: "rgba(255,255,255,0.03)", borderBottom: `1px solid ${C.border}` }}>
+                    <tr style={{ background: C.glassBg, borderBottom: `1px solid ${C.glassBorder}` }}>
                       {["SEGMENT", "STATUS", "OCCURRENCES", "ERRORS", "WARNINGS", "FIRST AT"].map(h => (
                         <th key={h} className="text-left py-3 px-4 font-mono" style={{ color: C.muted, fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em" }}>{h}</th>
                       ))}
@@ -915,7 +916,7 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
                   </thead>
                   <tbody>
                     {segments.map((seg, i) => (
-                      <tr key={seg.name} style={{ borderBottom: i < segments.length - 1 ? `1px solid ${C.border}` : "none", background: seg.status === "failed" ? `${C.err}04` : seg.status === "warning" ? `${C.warn}04` : undefined }}>
+                      <tr key={seg.name} style={{ borderBottom: i < segments.length - 1 ? `1px solid ${C.glassBorder}` : "none", background: seg.status === "failed" ? `${C.err}04` : seg.status === "warning" ? `${C.warn}04` : undefined }}>
                         <td className="py-3 px-4">
                           <span className="font-mono" style={{ color: C.em, fontSize: "0.82rem", fontWeight: 700 }}>{seg.name}</span>
                         </td>
@@ -939,7 +940,7 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
               </div>
 
               {/* Mini visual */}
-              <div className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${C.border}` }}>
+              <div className="p-4 rounded-xl" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, backdropFilter: "blur(12px)" }}>
                 <div className="font-mono mb-3" style={{ color: C.muted, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em" }}>ERROR DISTRIBUTION BY SEGMENT</div>
                 <div className="space-y-2">
                   {segments.filter(s => s.errors + s.warnings > 0).map(seg => {
@@ -949,7 +950,7 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
                     return (
                       <div key={seg.name} className="flex items-center gap-3">
                         <span className="font-mono w-10 text-right flex-shrink-0" style={{ color: C.sub, fontSize: "0.72rem", fontWeight: 700 }}>{seg.name}</span>
-                        <div className="flex-1 h-6 rounded-lg overflow-hidden" style={{ background: "rgba(255,255,255,0.04)" }}>
+                        <div className="flex-1 h-6 rounded-lg overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
                           <div className="h-full rounded-lg flex items-center px-3" style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${seg.errors > 0 ? C.err : C.warn}40, ${seg.errors > 0 ? C.err : C.warn})`, minWidth: 30 }}>
                             <span className="font-mono" style={{ color: "#fff", fontSize: "0.65rem", fontWeight: 700 }}>{seg.errors}e {seg.warnings > 0 ? `${seg.warnings}w` : ""}</span>
                           </div>
@@ -969,7 +970,7 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
       {tab === "explorer" && (
         <div className="grid grid-cols-5" style={{ minHeight: 420 }}>
           {/* Tree */}
-          <div className="col-span-2 p-4 overflow-auto" style={{ borderRight: `1px solid ${C.border}` }}>
+          <div className="col-span-2 p-4 overflow-auto" style={{ borderRight: `1px solid ${C.glassBorder}` }}>
             <div className="font-mono mb-3" style={{ color: C.muted, fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em" }}>EDI HIERARCHY TREE</div>
             {(FILE_ERRORS[file.id]?.length ?? 0) === 0 ? (
               <div className="py-8 text-center">
@@ -1018,18 +1019,18 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
                 </span>
                 {/* Toggle: View / Edit */}
                 {hasFullContent && (
-                  <div className="flex rounded-xl overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
+                  <div className="flex rounded-xl overflow-hidden" style={{ border: `1px solid ${C.glassBorder}` }}>
                     <button
                       onClick={() => setRawEditMode(false)}
                       className="flex items-center gap-1.5 px-3 py-2 font-mono transition-all"
-                      style={{ background: !rawEditMode ? C.emDim : "rgba(255,255,255,0.03)", color: !rawEditMode ? C.em : C.muted, fontSize: "0.68rem", fontWeight: !rawEditMode ? 700 : 500, borderRight: `1px solid ${C.border}` }}
+                      style={{ background: !rawEditMode ? C.emDim : C.glassBg, color: !rawEditMode ? C.em : C.muted, fontSize: "0.68rem", fontWeight: !rawEditMode ? 700 : 500, borderRight: `1px solid ${C.glassBorder}` }}
                     >
                       <Eye className="w-3 h-3" /> View
                     </button>
                     <button
                       onClick={() => setRawEditMode(true)}
                       className="flex items-center gap-1.5 px-3 py-2 font-mono transition-all"
-                      style={{ background: rawEditMode ? "rgba(139,92,246,0.12)" : "rgba(255,255,255,0.03)", color: rawEditMode ? C.purple : C.muted, fontSize: "0.68rem", fontWeight: rawEditMode ? 700 : 500 }}
+                      style={{ background: rawEditMode ? "rgba(139,92,246,0.12)" : C.glassBg, color: rawEditMode ? C.purple : C.muted, fontSize: "0.68rem", fontWeight: rawEditMode ? 700 : 500 }}
                     >
                       <Edit3 className="w-3 h-3" /> Edit
                     </button>
@@ -1042,14 +1043,14 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
             {rawEditMode && hasFullContent ? (
               <InlineEDIEditor fileId={file.id} fileName={file.name} errorLines={errorLineNums} />
             ) : rawLines.length === 0 ? (
-              <div className="py-12 text-center p-4 rounded-xl" style={{ background: "rgba(0,0,0,0.3)" }}>
+              <div className="py-12 text-center p-4 rounded-xl" style={{ background: C.glassBg, backdropFilter: "blur(12px)" }}>
                 <Terminal className="w-8 h-8 mx-auto mb-2" style={{ color: C.muted }} />
                 <p style={{ color: C.muted, fontSize: "0.78rem" }}>Raw EDI view not available for this file type.</p>
               </div>
             ) : (
               /* View mode — read-only highlighted lines */
-              <div className="rounded-xl overflow-hidden" style={{ background: "rgba(0,0,0,0.5)", border: `1px solid ${C.border}` }}>
-                <div className="flex items-center gap-2 px-4 py-2.5" style={{ borderBottom: `1px solid ${C.border}`, background: "rgba(255,255,255,0.02)" }}>
+              <div className="rounded-xl overflow-hidden" style={{ background: "rgba(4,8,18,0.7)", border: `1px solid ${C.glassBorder}`, backdropFilter: "blur(14px)" }}>
+                <div className="flex items-center gap-2 px-4 py-2.5" style={{ borderBottom: `1px solid ${C.glassBorder}`, background: C.glassBg }}>
                   <Terminal className="w-3.5 h-3.5" style={{ color: C.em }} />
                   <span className="font-mono" style={{ color: C.muted, fontSize: "0.65rem", letterSpacing: "0.08em" }}>{file.name} · {file.ediVersion}</span>
                   {hasFullContent && (
@@ -1145,7 +1146,7 @@ function FileDetailPanel({ file, onClose }: { file: ValidationFile; onClose: () 
                     <div key={seg}>
                       <div className="flex items-center gap-3 mb-1.5">
                         <span className="font-mono w-10 text-right flex-shrink-0" style={{ color: C.sub, fontSize: "0.78rem", fontWeight: 700 }}>{seg}</span>
-                        <div className="flex-1 h-8 rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}` }}>
+                        <div className="flex-1 h-8 rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.glassBorder}` }}>
                           <div className="h-full flex" style={{ width: `${barPct}%` }}>
                             {counts.errors > 0 && (
                               <div className="h-full flex items-center px-2.5 transition-all" style={{ width: `${errPct}%`, background: `linear-gradient(90deg, ${C.err}60, ${C.err})`, minWidth: counts.errors > 0 ? 24 : 0 }}>
@@ -1233,7 +1234,7 @@ function ErrorDetailPane({ error, onClose, compact }: { error: ErrorEntry; onClo
           { label: "Expected", value: error.expected, color: C.em },
           { label: "Actual", value: error.actual, color: C.err },
         ].map(row => (
-          <div key={row.label} className="p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
+          <div key={row.label} className="p-3 rounded-lg" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, backdropFilter: "blur(10px)" }}>
             <div style={{ color: C.muted, fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.08em", marginBottom: 4 }} className="font-mono">{row.label.toUpperCase()}</div>
             <div className="font-mono" style={{ color: row.color, fontSize: "0.78rem", fontWeight: 600, wordBreak: "break-word", lineHeight: 1.4 }}>{row.value}</div>
           </div>
@@ -1325,7 +1326,7 @@ export function ValidationReport({ projectName }: { projectName: string }) {
     setTimeout(() => { setArchiving(false); setArchived(true); }, 2500);
   };
 
-  const card = { background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}`, borderRadius: "1rem" } as React.CSSProperties;
+  const card = { background: C.glassBg, border: `1px solid ${C.glassBorder}`, borderRadius: "1rem", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" } as React.CSSProperties;
 
   return (
     <div className="space-y-5">
@@ -1336,7 +1337,7 @@ export function ValidationReport({ projectName }: { projectName: string }) {
             {["Projects", projectName, "Reports", "Data Validation Report"].map((crumb, i, arr) => (
               <span key={i} className="flex items-center gap-2">
                 <span style={{ color: i === arr.length - 1 ? C.em : C.muted, fontSize: "0.75rem", fontWeight: i === arr.length - 1 ? 600 : 400 }} className="font-mono">{crumb}</span>
-                {i < arr.length - 1 && <ChevronRight className="w-3 h-3" style={{ color: C.border }} />}
+                {i < arr.length - 1 && <ChevronRight className="w-3 h-3" style={{ color: C.glassBorder }} />}
               </span>
             ))}
           </div>
@@ -1344,7 +1345,7 @@ export function ValidationReport({ projectName }: { projectName: string }) {
           <p className="font-mono mt-1" style={{ color: C.muted, fontSize: "0.72rem" }}>Generated: 2026-03-16 10:20:00 UTC — 24-hour window</p>
         </div>
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.border}`, color: C.sub, fontSize: "0.8rem", fontWeight: 600 }}>
+          <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.sub, fontSize: "0.8rem", fontWeight: 600, backdropFilter: "blur(12px)" }}>
             <RefreshCw className="w-3.5 h-3.5" /> Refresh
           </button>
           <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ background: C.em, color: "#fff", fontSize: "0.8rem", fontWeight: 700, boxShadow: `0 0 20px ${C.emGlow}` }}>
@@ -1383,7 +1384,7 @@ export function ValidationReport({ projectName }: { projectName: string }) {
 
       {/* ─── File Table ─── */}
       <div style={card} className="overflow-hidden">
-        <div className="p-4 flex items-center justify-between gap-3" style={{ borderBottom: `1px solid ${C.border}` }}>
+        <div className="p-4 flex items-center justify-between gap-3" style={{ borderBottom: `1px solid ${C.glassBorder}` }}>
           <div>
             <div style={{ color: C.text, fontSize: "0.95rem", fontWeight: 700 }}>File-Level Validation Table</div>
             <div className="font-mono mt-0.5" style={{ color: C.muted, fontSize: "0.68rem" }}>{filteredFiles.length} files — click a row to open in-depth validation panel</div>
@@ -1391,12 +1392,12 @@ export function ValidationReport({ projectName }: { projectName: string }) {
           <div className="flex items-center gap-2">
             <div className="flex gap-1">
               {(["all", "passed", "failed", "warning"] as const).map(s => (
-                <button key={s} onClick={() => setStatusFilter(s)} className="px-2.5 py-1.5 rounded-lg font-mono transition-all" style={{ background: statusFilter === s ? C.emDim : "rgba(255,255,255,0.04)", border: `1px solid ${statusFilter === s ? `${C.em}40` : C.border}`, color: statusFilter === s ? C.em : C.muted, fontSize: "0.65rem", fontWeight: 700 }}>
+                <button key={s} onClick={() => setStatusFilter(s)} className="px-2.5 py-1.5 rounded-lg font-mono transition-all" style={{ background: statusFilter === s ? C.emDim : C.glassBg, border: `1px solid ${statusFilter === s ? `${C.em}40` : C.glassBorder}`, color: statusFilter === s ? C.em : C.muted, fontSize: "0.65rem", fontWeight: 700, backdropFilter: "blur(8px)" }}>
                   {s.toUpperCase()}
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}` }}>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, backdropFilter: "blur(10px)" }}>
               <Search className="w-3 h-3" style={{ color: C.muted }} />
               <input type="text" placeholder="Search files..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="bg-transparent outline-none font-mono" style={{ color: C.text, fontSize: "0.72rem", width: 130 }} />
             </div>
@@ -1405,7 +1406,7 @@ export function ValidationReport({ projectName }: { projectName: string }) {
 
         <table className="w-full">
           <thead>
-            <tr style={{ background: "rgba(255,255,255,0.02)", borderBottom: `1px solid ${C.border}` }}>
+            <tr style={{ background: C.glassBg, borderBottom: `1px solid ${C.glassBorder}` }}>
               {["FILE NAME", "TYPE", "TIMESTAMP", "STATUS", "ERRORS", "WARNINGS", "SNIP", "TRANSACTIONS", ""].map((h, i) => (
                 <th key={i} className="text-left py-3 px-4 font-mono" style={{ color: C.muted, fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.08em" }}>{h}</th>
               ))}
@@ -1417,7 +1418,7 @@ export function ValidationReport({ projectName }: { projectName: string }) {
                 key={file.id}
                 onClick={() => setSelectedFile(selectedFile?.id === file.id ? null : file)}
                 className="cursor-pointer transition-all hover:bg-white/[0.025]"
-                style={{ borderBottom: `1px solid ${C.border}`, background: selectedFile?.id === file.id ? `${C.em}04` : undefined }}
+                style={{ borderBottom: `1px solid ${C.glassBorder}`, background: selectedFile?.id === file.id ? `${C.em}05` : undefined }}
               >
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-2">
@@ -1489,12 +1490,12 @@ export function ValidationReport({ projectName }: { projectName: string }) {
         </div>
         <div className="grid grid-cols-3 gap-5">
           {/* Field selection */}
-          <div className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
+          <div className="p-4 rounded-xl" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, backdropFilter: "blur(12px)" }}>
             <div className="font-mono mb-3" style={{ color: C.muted, fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em" }}>SELECT FIELDS</div>
             <div className="space-y-1.5">
               {exportFields.map(field => (
                 <button key={field.id} onClick={() => setExportFields(prev => prev.map(f => f.id === field.id ? { ...f, selected: !f.selected } : f))} className="w-full flex items-center gap-2.5 p-2.5 rounded-lg transition-all hover:bg-white/5">
-                  <div className="w-4 h-4 rounded flex items-center justify-center flex-shrink-0" style={{ background: field.selected ? C.em : "rgba(255,255,255,0.08)", border: field.selected ? "none" : `1px solid ${C.border}` }}>
+                  <div className="w-4 h-4 rounded flex items-center justify-center flex-shrink-0" style={{ background: field.selected ? C.em : C.glassBg, border: field.selected ? "none" : `1px solid ${C.glassBorder}` }}>
                     {field.selected && <span style={{ color: "#fff", fontSize: "0.6rem" }}>✓</span>}
                   </div>
                   <span style={{ color: field.selected ? C.text : C.muted, fontSize: "0.78rem" }}>{field.label}</span>
@@ -1503,15 +1504,15 @@ export function ValidationReport({ projectName }: { projectName: string }) {
             </div>
           </div>
           {/* Field mapping */}
-          <div className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
+          <div className="p-4 rounded-xl" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, backdropFilter: "blur(12px)" }}>
             <div className="font-mono mb-3" style={{ color: C.muted, fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em" }}>FIELD MAPPING</div>
             <div className="space-y-2">
               {fieldMappings.map((m, i) => (
                 <div key={m.id} className="flex items-center gap-1.5">
-                  <input value={m.source} onChange={e => setFieldMappings(prev => prev.map((x, j) => j === i ? { ...x, source: e.target.value } : x))} className="flex-1 px-2.5 py-1.5 rounded-lg font-mono outline-none" style={{ background: "rgba(0,0,0,0.3)", border: `1px solid ${C.border}`, color: C.sub, fontSize: "0.72rem" }} />
+                  <input value={m.source} onChange={e => setFieldMappings(prev => prev.map((x, j) => j === i ? { ...x, source: e.target.value } : x))} className="flex-1 px-2.5 py-1.5 rounded-lg font-mono outline-none" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.sub, fontSize: "0.72rem", backdropFilter: "blur(8px)" }} />
                   <span style={{ color: C.muted, fontSize: "0.8rem" }}>→</span>
                   <input value={m.target} onChange={e => setFieldMappings(prev => prev.map((x, j) => j === i ? { ...x, target: e.target.value } : x))} className="flex-1 px-2.5 py-1.5 rounded-lg font-mono outline-none" style={{ background: C.emDim, border: `1px solid ${C.em}25`, color: C.em, fontSize: "0.72rem" }} />
-                  <select value={m.type} onChange={e => setFieldMappings(prev => prev.map((x, j) => j === i ? { ...x, type: e.target.value as FieldMapping["type"] } : x))} className="px-1.5 py-1.5 rounded-lg font-mono outline-none" style={{ background: "rgba(0,0,0,0.3)", border: `1px solid ${C.border}`, color: C.muted, fontSize: "0.68rem" }}>
+                  <select value={m.type} onChange={e => setFieldMappings(prev => prev.map((x, j) => j === i ? { ...x, type: e.target.value as FieldMapping["type"] } : x))} className="px-1.5 py-1.5 rounded-lg font-mono outline-none" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.muted, fontSize: "0.68rem", backdropFilter: "blur(8px)" }}>
                     <option value="string">str</option>
                     <option value="integer">int</option>
                     <option value="boolean">bool</option>
@@ -1524,7 +1525,7 @@ export function ValidationReport({ projectName }: { projectName: string }) {
             </div>
           </div>
           {/* JSON preview */}
-          <div className="p-4 rounded-xl flex flex-col" style={{ background: "rgba(0,0,0,0.35)", border: `1px solid ${C.em}15` }}>
+          <div className="p-4 rounded-xl flex flex-col" style={{ background: "rgba(4,9,20,0.8)", border: `1px solid rgba(16,185,129,0.2)`, backdropFilter: "blur(16px)" }}>
             <div className="flex items-center justify-between mb-3">
               <span className="font-mono" style={{ color: C.em, fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em" }}>JSON PREVIEW</span>
               <Copy className="w-3.5 h-3.5" style={{ color: C.muted }} />
@@ -1542,7 +1543,7 @@ export function ValidationReport({ projectName }: { projectName: string }) {
         </div>
         <div className="grid grid-cols-2 gap-5">
           <div>
-            <div className="flex gap-4 mb-2 px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
+            <div className="flex gap-4 mb-2 px-3 py-2 rounded-lg" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, backdropFilter: "blur(8px)" }}>
               <span className="font-mono flex-1" style={{ color: C.muted, fontSize: "0.62rem", fontWeight: 700 }}>COLUMN NAME</span>
               <span className="font-mono flex-1" style={{ color: C.muted, fontSize: "0.62rem", fontWeight: 700 }}>SOURCE FIELD</span>
               <span className="w-6" />
@@ -1551,7 +1552,7 @@ export function ValidationReport({ projectName }: { projectName: string }) {
               {csvColumns.map((col, i) => (
                 <div key={col.id} className="flex items-center gap-2">
                   <GripVertical className="w-3.5 h-3.5" style={{ color: C.muted }} />
-                  <input value={col.columnName} onChange={e => setCsvColumns(prev => prev.map((c, j) => j === i ? { ...c, columnName: e.target.value } : c))} className="flex-1 px-3 py-2 rounded-lg font-mono outline-none" style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.border}`, color: C.text, fontSize: "0.75rem" }} />
+                  <input value={col.columnName} onChange={e => setCsvColumns(prev => prev.map((c, j) => j === i ? { ...c, columnName: e.target.value } : c))} className="flex-1 px-3 py-2 rounded-lg font-mono outline-none" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.text, fontSize: "0.75rem", backdropFilter: "blur(8px)" }} />
                   <input value={col.sourceField} onChange={e => setCsvColumns(prev => prev.map((c, j) => j === i ? { ...c, sourceField: e.target.value } : c))} className="flex-1 px-3 py-2 rounded-lg font-mono outline-none" style={{ background: C.emDim, border: `1px solid ${C.em}20`, color: C.em, fontSize: "0.75rem" }} />
                   <button onClick={() => setCsvColumns(prev => prev.filter((_, j) => j !== i))}><Trash2 className="w-3.5 h-3.5" style={{ color: C.muted }} /></button>
                 </div>
@@ -1561,7 +1562,7 @@ export function ValidationReport({ projectName }: { projectName: string }) {
               </button>
             </div>
           </div>
-          <div className="p-4 rounded-xl flex flex-col" style={{ background: "rgba(0,0,0,0.35)", border: `1px solid ${C.em}15` }}>
+          <div className="p-4 rounded-xl flex flex-col" style={{ background: "rgba(4,9,20,0.8)", border: `1px solid rgba(16,185,129,0.2)`, backdropFilter: "blur(16px)" }}>
             <div className="flex items-center justify-between mb-3">
               <span className="font-mono" style={{ color: C.em, fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em" }}>CSV PREVIEW</span>
               <button className="flex items-center gap-1 px-2.5 py-1 rounded-lg" style={{ background: C.em, color: "#fff", fontSize: "0.65rem", fontWeight: 700 }}><Download className="w-2.5 h-2.5" /> Download</button>
@@ -1602,7 +1603,7 @@ export function ValidationReport({ projectName }: { projectName: string }) {
                     <span className="font-mono" style={{ color: status === "sent" ? C.em : C.warn, fontSize: "0.65rem", fontWeight: 700 }}>ACK {status.toUpperCase()}</span>
                   </div>
                 )}
-                <button onClick={() => !status && handleSendAck(ack.key)} disabled={!!status || isSending} className="w-full py-2.5 rounded-xl font-mono transition-all hover:scale-105" style={{ background: status ? "rgba(255,255,255,0.04)" : `${ack.color}18`, border: `1px solid ${status ? C.border : `${ack.color}35`}`, color: status ? C.muted : ack.color, fontSize: "0.75rem", fontWeight: 700 }}>
+                <button onClick={() => !status && handleSendAck(ack.key)} disabled={!!status || isSending} className="w-full py-2.5 rounded-xl font-mono transition-all hover:scale-105" style={{ background: status ? C.glassBg : `${ack.color}18`, border: `1px solid ${status ? C.glassBorder : `${ack.color}35`}`, color: status ? C.muted : ack.color, fontSize: "0.75rem", fontWeight: 700, backdropFilter: "blur(8px)" }}>
                   {isSending ? "Sending…" : status ? "Sent ✓" : "Send Now"}
                 </button>
               </div>
@@ -1625,8 +1626,8 @@ export function ValidationReport({ projectName }: { projectName: string }) {
               { key: "fsx", label: "AWS FSx", sub: "Managed file system" },
               { key: "local", label: "Local Storage", sub: "On-premise filesystem" },
             ].map(dest => (
-              <button key={dest.key} onClick={() => setArchiveDest(prev => ({ ...prev, [dest.key]: !prev[dest.key as keyof typeof prev] }))} className="w-full flex items-center gap-3 p-3.5 rounded-xl text-left transition-all" style={{ background: archiveDest[dest.key as keyof typeof archiveDest] ? C.emDim : "rgba(255,255,255,0.03)", border: `1px solid ${archiveDest[dest.key as keyof typeof archiveDest] ? `${C.em}35` : C.border}` }}>
-                <div className="w-4 h-4 rounded flex items-center justify-center flex-shrink-0" style={{ background: archiveDest[dest.key as keyof typeof archiveDest] ? C.em : "rgba(255,255,255,0.06)", border: archiveDest[dest.key as keyof typeof archiveDest] ? "none" : `1px solid ${C.border}` }}>
+              <button key={dest.key} onClick={() => setArchiveDest(prev => ({ ...prev, [dest.key]: !prev[dest.key as keyof typeof prev] }))} className="w-full flex items-center gap-3 p-3.5 rounded-xl text-left transition-all" style={{ background: archiveDest[dest.key as keyof typeof archiveDest] ? C.emDim : C.glassBg, border: `1px solid ${archiveDest[dest.key as keyof typeof archiveDest] ? `${C.em}35` : C.glassBorder}`, backdropFilter: "blur(10px)" }}>
+                <div className="w-4 h-4 rounded flex items-center justify-center flex-shrink-0" style={{ background: archiveDest[dest.key as keyof typeof archiveDest] ? C.em : C.glassBg, border: archiveDest[dest.key as keyof typeof archiveDest] ? "none" : `1px solid ${C.glassBorder}` }}>
                   {archiveDest[dest.key as keyof typeof archiveDest] && <span style={{ color: "#fff", fontSize: "0.6rem" }}>✓</span>}
                 </div>
                 <div>
@@ -1639,7 +1640,7 @@ export function ValidationReport({ projectName }: { projectName: string }) {
           <div className="col-span-2 flex flex-col gap-3">
             <div>
               <div className="font-mono mb-2" style={{ color: C.muted, fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.1em" }}>DESTINATION URI</div>
-              <input value={archiveUri} onChange={e => setArchiveUri(e.target.value)} className="w-full px-4 py-2.5 rounded-xl font-mono outline-none" style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${C.em}20`, color: "#34D399", fontSize: "0.78rem" }} />
+              <input value={archiveUri} onChange={e => setArchiveUri(e.target.value)} className="w-full px-4 py-2.5 rounded-xl font-mono outline-none" style={{ background: "rgba(4,9,20,0.75)", border: `1px solid rgba(16,185,129,0.22)`, color: "#34D399", fontSize: "0.78rem", backdropFilter: "blur(12px)" }} />
               <div className="font-mono mt-1" style={{ color: C.muted, fontSize: "0.65rem" }}>Will archive to: <span style={{ color: C.sub }}>{archiveUri}report_2026-03-16.zip</span></div>
             </div>
             <div className="flex-1 flex flex-col justify-end gap-2">

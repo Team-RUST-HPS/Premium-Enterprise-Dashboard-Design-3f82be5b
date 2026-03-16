@@ -1,0 +1,305 @@
+Figma AI Prompt — High-Speed AI Mapping Window
+
+Design a next-generation schema mapping window for an enterprise data transformation platform.
+
+The purpose of this interface is to allow users to define and manage extremely large mappings (up to 100,000 field mappings) in a very fast, visually clean, and relaxing environment.
+
+The UI should prioritize speed, clarity, and automation, allowing users to confirm or adjust mappings quickly rather than manually drawing connections.
+
+The visual quality should match modern enterprise tools similar to dashboards built by Stripe and Vercel.
+
+Theme Style
+
+Theme: Emerald Neural Mapping
+
+Background
+
+Deep dark gradient
+
+#0B1220 → #0F1A2F
+
+Primary Accent
+
+Neon Emerald
+
+#10B981
+
+Glow Accent
+
+#34D399
+
+Glass Panel
+
+rgba(255,255,255,0.05)
+
+Text
+
+Primary: #F8FAFC
+Muted: #94A3B8
+
+Layout Structure
+
+Three-column mapping workspace.
+
+SOURCE STRUCTURE | MAPPING CANVAS | TARGET STRUCTURE
+
+Left panel
+Source schema explorer
+
+Center panel
+Mapping visualization workspace
+
+Right panel
+Target schema explorer
+
+Panels should be scroll synchronized so source and target remain aligned.
+
+Source Schema Panel
+
+Display hierarchical data structures.
+
+Supported types:
+
+EDI
+XML
+JSON
+CSV
+
+Structure example
+
+ISA
+  ISA06 Sender ID
+  ISA08 Receiver ID
+
+GS
+  GS01 Functional ID
+
+ST
+  ST01 Transaction Code
+  ST02 Control Number
+
+Use icons for
+
+Loop
+Segment
+Element
+
+Fields should appear as compact rows for large schemas.
+
+Target Schema Panel
+
+Display destination structure.
+
+Example
+
+sender_id
+receiver_id
+transaction_type
+claim_number
+
+Each field should show
+
+field name
+data type
+description
+
+Fields must align vertically with source fields when mapped.
+
+Automatic Mapping Generation
+
+When a mapping specification is selected:
+
+The system automatically generates connections between fields.
+
+Connections should appear instantly across the canvas.
+
+No manual drawing required.
+
+The interface should support tens of thousands of mappings simultaneously without visual clutter.
+
+Mapping Connection Style
+
+Connections should use very thin neon lines.
+
+Line properties
+
+Thickness: 1px
+
+Color:
+
+#10B981
+
+Glow effect:
+
+soft neon blur
+
+Lines should appear subtle and elegant, not heavy or distracting.
+
+When user hovers a connection, it should brighten slightly.
+
+AI Logic Boxes
+
+When a mapping contains transformation logic, display a logic node box between source and target.
+
+Example mapping:
+
+ISA06 → trim() → sender_id
+
+Logic box style:
+
+small floating glass card
+
+Contains
+
+transformation name
+logic preview
+
+Example:
+
+Transformation
+trim()
+AI Assisted Logic Creation
+
+Clicking the logic box opens an AI transformation helper.
+
+User can type:
+
+"convert to uppercase"
+
+or
+
+"extract first 5 characters"
+
+The system suggests transformation logic.
+
+Example suggestions
+
+substring(0,5)
+uppercase()
+dateFormat(YYYY-MM-DD)
+High-Speed Mapping UX
+
+The UI must support extremely fast workflows.
+
+Design for:
+
+100,000 mappings in under 15 minutes.
+
+Key UX features:
+
+Auto mapping by name similarity
+
+Bulk accept suggestions
+
+Multi-select mapping edits
+
+Keyboard shortcuts
+
+Mapping filtering
+
+Mapping Density Optimization
+
+To keep the UI relaxing:
+
+Connections should fade slightly when not selected.
+
+Only hovered or active mappings should glow strongly.
+
+Add toggle options
+
+Show All Mappings
+
+Show Active
+
+Show Unmapped Fields
+
+Mapping Health Indicator
+
+Top panel shows mapping completeness.
+
+Example
+
+Mapped Fields
+92,104 / 100,000
+
+Progress indicator bar.
+
+Mapping Navigation
+
+Provide navigation tools.
+
+Mini-map of mapping canvas.
+
+Zoom slider.
+
+Segment filter.
+
+Example filters
+
+ISA
+
+GS
+
+ST
+
+CLM
+
+AI Mapping Suggestions
+
+Side widget shows AI suggestions.
+
+Example
+
+ISA06 → sender_id
+Confidence: 98%
+
+User can accept multiple suggestions at once.
+
+Visual Comfort
+
+The UI must remain calm and readable even with massive mappings.
+
+Design principles
+
+dark background
+soft glow highlights
+low contrast lines
+minimal visual noise
+
+Avoid thick lines or dense overlays.
+
+Micro Animations
+
+Subtle interactions
+
+Mapping lines animate in softly when generated
+
+Logic boxes fade in
+
+Hover glow effects
+
+Neural network style background motion (very subtle)
+
+Components to Generate
+
+SourceSchemaTree
+
+TargetSchemaTree
+
+MappingLine
+
+LogicNodeBox
+
+MappingCanvas
+
+AISuggestionPanel
+
+MappingProgressIndicator
+
+MiniMapNavigator
+
+UX Goal
+
+Users should feel like they are supervising an intelligent mapping system, not manually creating every mapping.
+
+The interface should make extremely large mapping projects feel fast, effortless, and visually relaxing.

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useTheme } from "../context/theme";
 import {
   Terminal, Play, RotateCcw, AlertCircle, AlertTriangle, CheckCircle2,
   Copy, Download, ChevronRight, ChevronDown, Hash,
@@ -12,7 +13,8 @@ const C = {
   bg: "var(--c-bg)", surface: "var(--c-surface)", border: "var(--c-border)",
   borderMed: "var(--c-border-med)",
   cardSubtle: "var(--c-card-subtle)", iconInactive: "var(--c-icon-inactive)", subtle: "var(--c-subtle)",
-  em: "#10B981", emDim: "rgba(16,185,129,0.12)", emGlow: "rgba(16,185,129,0.35)",
+  em: "#10B981", emDim: "rgba(16,185,129,0.12)", emGlow: "var(--c-em-glow)",
+  glassBg: "var(--c-glass-bg)", glassBorder: "var(--c-glass-border)",
   text: "var(--c-text)", sub: "var(--c-sub)", muted: "var(--c-muted)",
   err: "#EF4444", errDim: "rgba(239,68,68,0.10)",
   warn: "#F59E0B", warnDim: "rgba(245,158,11,0.10)",
@@ -384,6 +386,8 @@ const SOURCE_DEFS: { id: LoadSource; label: string; icon: React.FC<any>; color: 
 
 // ─── File Loader Panel ────────────────────────────────────────────────────────
 function FileLoaderPanel({ onLoad, onClose }: { onLoad: (content: string, name: string) => void; onClose: () => void }) {
+  const { isDark } = useTheme();
+  const panelBg    = isDark ? "#0A1020" : "#FFFFFF";
   const [source, setSource] = useState<LoadSource>("local");
   const [cfg, setCfg] = useState<LoaderConfig>(DEFAULT_LOADER_CFG);
   const [loading, setLoading] = useState(false);
@@ -440,10 +444,10 @@ IEA*1*000000001~`;
   const srcDef = SOURCE_DEFS.find(s => s.id === source)!;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)" }}>
-      <div className="w-full max-w-2xl rounded-2xl overflow-hidden" style={{ background: "#0A1020", border: `1px solid ${C.em}30`, boxShadow: `0 0 60px ${C.em}15` }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.72)", backdropFilter: "blur(8px)" }}>
+      <div className="w-full max-w-2xl rounded-2xl overflow-hidden" style={{ background: panelBg, border: `1px solid ${C.em}30`, boxShadow: `0 0 60px ${C.em}15` }}>
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: `1px solid ${C.border}`, background: "rgba(16,185,129,0.04)" }}>
+        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: `1px solid ${C.glassBorder}`, background: "rgba(16,185,129,0.06)" }}>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: C.emDim, border: `1px solid ${C.em}35` }}>
               <FolderOpen className="w-4.5 h-4.5" style={{ color: C.em, width: 18, height: 18 }} />
@@ -469,7 +473,7 @@ IEA*1*000000001~`;
                 className="flex items-center gap-2.5 p-3 rounded-xl text-left transition-all hover:scale-[1.02]"
                 style={{
                   background: source === s.id ? `${s.color}12` : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${source === s.id ? `${s.color}40` : C.border}`,
+                  border: `1px solid ${source === s.id ? `${s.color}40` : C.glassBorder}`,
                   boxShadow: source === s.id ? `0 0 16px ${s.color}18` : "none",
                 }}
               >
@@ -485,7 +489,7 @@ IEA*1*000000001~`;
 
         {/* Source config */}
         <div className="px-6 pb-5">
-          <div className="p-4 rounded-xl" style={{ background: "rgba(0,0,0,0.3)", border: `1px solid ${srcDef.color}20` }}>
+          <div className="p-4 rounded-xl" style={{ background: C.glassBg, border: `1px solid ${srcDef.color}30` }}>
             <div className="flex items-center gap-2 mb-4">
               <srcDef.icon className="w-3.5 h-3.5" style={{ color: srcDef.color }} />
               <span className="font-mono" style={{ color: srcDef.color, fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.08em" }}>{srcDef.label.toUpperCase()} CONFIGURATION</span>
@@ -527,7 +531,7 @@ IEA*1*000000001~`;
                       onChange={e => updateCfg("s3", f.key, e.target.value)}
                       placeholder={f.placeholder}
                       className="w-full px-3 py-2 rounded-lg outline-none font-mono"
-                      style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${C.border}`, color: C.text, fontSize: "0.72rem" }}
+                      style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.text, fontSize: "0.72rem" }}
                     />
                   </div>
                 ))}
@@ -553,7 +557,7 @@ IEA*1*000000001~`;
                       onChange={e => updateCfg("fsx", f.key, e.target.value)}
                       placeholder={f.placeholder}
                       className="w-full px-3 py-2 rounded-lg outline-none font-mono"
-                      style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${C.border}`, color: C.text, fontSize: "0.72rem" }}
+                      style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.text, fontSize: "0.72rem" }}
                     />
                   </div>
                 ))}
@@ -579,7 +583,7 @@ IEA*1*000000001~`;
                       onChange={e => updateCfg("azure", f.key, e.target.value)}
                       placeholder={f.placeholder}
                       className="w-full px-3 py-2 rounded-lg outline-none font-mono"
-                      style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${C.border}`, color: C.text, fontSize: "0.72rem" }}
+                      style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.text, fontSize: "0.72rem" }}
                     />
                   </div>
                 ))}
@@ -606,7 +610,7 @@ IEA*1*000000001~`;
                       onChange={e => updateCfg("sftp", f.key, e.target.value)}
                       placeholder={f.placeholder}
                       className="w-full px-3 py-2 rounded-lg outline-none font-mono"
-                      style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${C.border}`, color: C.text, fontSize: "0.72rem" }}
+                      style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.text, fontSize: "0.72rem" }}
                     />
                   </div>
                 ))}
@@ -627,7 +631,7 @@ IEA*1*000000001~`;
                     onChange={e => updateCfg("url", "url", e.target.value)}
                     placeholder="https://api.partner.com/edi/file"
                     className="w-full px-3 py-2 rounded-lg outline-none font-mono"
-                    style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${C.border}`, color: C.text, fontSize: "0.72rem" }}
+                    style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.text, fontSize: "0.72rem" }}
                   />
                 </div>
                 <div>
@@ -637,7 +641,7 @@ IEA*1*000000001~`;
                     onChange={e => updateCfg("url", "headers", e.target.value)}
                     rows={3}
                     className="w-full px-3 py-2 rounded-lg outline-none font-mono resize-none"
-                    style={{ background: "rgba(0,0,0,0.4)", border: `1px solid ${C.border}`, color: C.text, fontSize: "0.72rem", lineHeight: 1.6 }}
+                    style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.text, fontSize: "0.72rem", lineHeight: 1.6 }}
                   />
                 </div>
               </div>
@@ -654,7 +658,7 @@ IEA*1*000000001~`;
           {/* Footer actions */}
           {source !== "local" && (
             <div className="flex items-center gap-3 mt-5">
-              <button onClick={onClose} className="flex-1 py-2.5 rounded-xl font-mono" style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.border}`, color: C.sub, fontSize: "0.78rem", fontWeight: 600 }}>
+              <button onClick={onClose} className="flex-1 py-2.5 rounded-xl font-mono" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.sub, fontSize: "0.78rem", fontWeight: 600, }}>
                 Cancel
               </button>
               <button
@@ -679,6 +683,19 @@ IEA*1*000000001~`;
 
 // ─── Main EDI Live Editor Component ──────────────────────────────────────────
 export function EDILiveEditor() {
+  const { isDark } = useTheme();
+  // theme-adaptive surface tokens
+  const outerBg    = isDark ? "#060C17"            : "#FFFFFF";
+  const toolbarBg  = isDark ? "rgba(7,12,24,0.95)" : "#FFFFFF";
+  const rightTabBg = isDark ? "rgba(7,12,24,0.92)" : "#FFFFFF";
+  const editorBg   = isDark ? "#050B18"            : "#FFFFFF";
+  const gutterBg   = isDark ? "rgba(5,10,22,0.7)"  : "#F8FAFC";
+  const errGutterBg= isDark ? "rgba(5,8,18,0.85)"  : "#F8FAFC";
+  const consoleBg  = isDark ? "rgba(4,8,18,0.70)"  : "#FFFFFF";
+  const engineBg   = isDark ? "rgba(4,8,18,0.75)"  : "#F8FAFC";
+  const inactiveBtnBg = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)";
+  const textareaColor = isDark ? "#94A3B8"          : "#334155";
+
   const [selectedFile, setSelectedFile] = useState("837p_errors");
   const [content, setContent] = useState(SAMPLE_FILES["837p_errors"].content);
   const [showLoader, setShowLoader] = useState(false);
@@ -691,39 +708,42 @@ export function EDILiveEditor() {
   const [activePanel, setActivePanel] = useState<"errors" | "tree" | "console">("errors");
   const [parseHistory, setParseHistory] = useState<{ ts: string; errors: number; warnings: number; ms: number }[]>([]);
   const [autoRun, setAutoRun] = useState(true);
+  const [segmentFilter, setSegmentFilter] = useState<string>("ALL");
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLDivElement>(null);
   const parseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Sync scroll between textarea and highlight
+  // rAF-throttled scroll sync — prevents layout thrashing on every event tick
+  const rafRef = useRef<number | null>(null);
   const syncScroll = useCallback(() => {
-    if (textareaRef.current && highlightRef.current) {
-      highlightRef.current.scrollTop = textareaRef.current.scrollTop;
-      highlightRef.current.scrollLeft = textareaRef.current.scrollLeft;
-    }
+    if (rafRef.current) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      if (textareaRef.current && highlightRef.current) {
+        highlightRef.current.scrollTop = textareaRef.current.scrollTop;
+        highlightRef.current.scrollLeft = textareaRef.current.scrollLeft;
+      }
+    });
   }, []);
 
-  // Run parse
+  // Run parse — fully synchronous, zero artificial delay
   const runParse = useCallback((text: string) => {
-    setIsParsing(true);
-    // Small timeout to show parsing state
-    setTimeout(() => {
-      const result = parseEDI(text);
-      setParseResult(result);
-      setIsParsing(false);
-      setParseHistory(prev => [
-        { ts: new Date().toLocaleTimeString(), errors: result.errors.filter(e => e.severity === "error").length, warnings: result.errors.filter(e => e.severity === "warning").length, ms: result.parseTimeMs },
-        ...prev.slice(0, 9),
-      ]);
-    }, 60);
+    const result = parseEDI(text);
+    setParseResult(result);
+    setIsParsing(false);
+    setParseHistory(prev => [
+      { ts: new Date().toLocaleTimeString(), errors: result.errors.filter(e => e.severity === "error").length, warnings: result.errors.filter(e => e.severity === "warning").length, ms: result.parseTimeMs },
+      ...prev.slice(0, 9),
+    ]);
   }, []);
 
-  // Auto-parse on content change (debounced 400ms)
+  // Auto-parse on content change (debounced 500ms)
   useEffect(() => {
     if (!autoRun) return;
+    setIsParsing(true);
     if (parseTimerRef.current) clearTimeout(parseTimerRef.current);
-    parseTimerRef.current = setTimeout(() => runParse(content), 400);
+    parseTimerRef.current = setTimeout(() => runParse(content), 500);
     return () => { if (parseTimerRef.current) clearTimeout(parseTimerRef.current); };
   }, [content, autoRun, runParse]);
 
@@ -737,17 +757,34 @@ export function EDILiveEditor() {
     setSelectedErrorId(null);
   };
 
-  const lineCount = content.split("\n").length;
+  // Single split, reused everywhere — never split the same string twice per render
+  const contentLines = useMemo(() => content.split("\n"), [content]);
+  const lineCount = contentLines.length;
+
+  // O(1) line-error lookup — replaces O(n²) .some() in the gutter
+  const errLineMap = useMemo(() => {
+    const m = new Map<number, "error" | "warning">();
+    if (!parseResult) return m;
+    for (const e of parseResult.errors) {
+      const existing = m.get(e.lineNumber);
+      if (!existing || (existing === "warning" && e.severity === "error")) {
+        m.set(e.lineNumber, e.severity as "error" | "warning");
+      }
+    }
+    return m;
+  }, [parseResult]);
+
+  const errCount  = useMemo(() => parseResult?.errors.filter(e => e.severity === "error").length ?? 0,   [parseResult]);
+  const warnCount = useMemo(() => parseResult?.errors.filter(e => e.severity === "warning").length ?? 0, [parseResult]);
+
+  const selectedError = useMemo(() => parseResult?.errors.find(e => e.id === selectedErrorId) ?? null, [parseResult, selectedErrorId]);
 
   const highlightedHtml = useMemo(
-    () => (showHighlight ? highlightEDI(content, parseResult) : content.split("\n").map((l, i) => `<span style="display:block;border-left:3px solid transparent;padding-left:4px">${l || " "}</span>`).join("")),
-    [content, parseResult, showHighlight]
+    () => showHighlight
+      ? highlightEDI(content, parseResult)
+      : contentLines.map(l => `<span style="display:block;border-left:3px solid transparent;padding-left:4px">${l || " "}</span>`).join(""),
+    [content, contentLines, parseResult, showHighlight]
   );
-
-  const errCount = parseResult?.errors.filter(e => e.severity === "error").length ?? 0;
-  const warnCount = parseResult?.errors.filter(e => e.severity === "warning").length ?? 0;
-
-  const selectedError = parseResult?.errors.find(e => e.id === selectedErrorId) ?? null;
 
   const scrollToLine = (lineNumber: number) => {
     if (!textareaRef.current) return;
@@ -757,10 +794,62 @@ export function EDILiveEditor() {
     textareaRef.current.setSelectionRange(charPos, charPos + (lines[lineNumber - 1] || "").length);
   };
 
+  const SEGMENT_PILLS = ["ALL","ISA","GS","ST","BHT","NM1","CLM","DTP","SV1"];
+
+  const handleSegmentPill = (seg: string) => {
+    setSegmentFilter(seg);
+    if (seg === "ALL") return;
+    const lines = content.split("\n");
+    const idx = lines.findIndex(l => l.trimStart().startsWith(seg + "*") || l.trim() === seg);
+    if (idx !== -1) scrollToLine(idx + 1);
+  };
+
   return (
-    <div className="flex flex-col" style={{ height: "calc(100vh - 64px)", background: "#060C17" }}>
+    <div className="flex flex-col" style={{ height: "calc(100vh - 64px)", background: outerBg }}>
+
+      {/* ── Segment Filter Pills ── */}
+      <div
+        className="flex items-center gap-2 px-5 flex-shrink-0 overflow-x-auto"
+        style={{
+          paddingTop: 10, paddingBottom: 10,
+          borderBottom: `1px solid ${C.glassBorder}`,
+          background: toolbarBg,
+          backdropFilter: "blur(28px)",
+          WebkitBackdropFilter: "blur(28px)",
+          scrollbarWidth: "none",
+        }}
+      >
+        {SEGMENT_PILLS.map(seg => {
+          const active = segmentFilter === seg;
+          return (
+            <button
+              key={seg}
+              onClick={() => handleSegmentPill(seg)}
+              className="font-mono flex-shrink-0 transition-all"
+              style={{
+                padding: "4px 14px",
+                borderRadius: 999,
+                fontSize: "0.68rem",
+                fontWeight: active ? 700 : 500,
+                letterSpacing: "0.03em",
+                cursor: "pointer",
+                border: `1.5px solid ${active ? C.em : isDark ? "rgba(255,255,255,0.14)" : "#CBD5E1"}`,
+                background: active
+                  ? isDark ? "rgba(16,185,129,0.14)" : "rgba(16,185,129,0.10)"
+                  : isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF",
+                color: active ? C.em : isDark ? "#94A3B8" : "#64748B",
+                boxShadow: active ? `0 0 10px ${C.emGlow}, 0 0 20px ${C.emGlow}` : "none",
+                textShadow: active ? `0 0 8px ${C.emGlow}` : "none",
+              }}
+            >
+              {seg}
+            </button>
+          );
+        })}
+      </div>
+
       {/* ── Top Bar ── */}
-      <div className="flex items-center justify-between px-5 py-3 flex-shrink-0" style={{ borderBottom: `1px solid ${C.border}`, background: "rgba(8,14,26,0.95)", backdropFilter: "blur(20px)" }}>
+      <div className="flex items-center justify-between px-5 py-3 flex-shrink-0" style={{ borderBottom: `1px solid ${C.glassBorder}`, background: toolbarBg, backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)" }}>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.35)" }}>
             <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: C.purple }} />
@@ -785,7 +874,7 @@ export function EDILiveEditor() {
             value={selectedFile}
             onChange={e => loadSample(e.target.value)}
             className="px-3 py-2 rounded-lg font-mono outline-none"
-            style={{ background: "rgba(255,255,255,0.05)", border: `1px solid ${C.border}`, color: C.text, fontSize: "0.72rem" }}
+            style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.text, fontSize: "0.72rem" }}
           >
             {Object.entries(SAMPLE_FILES).map(([k, f]) => (
               <option key={k} value={k}>{f.label}</option>
@@ -796,7 +885,7 @@ export function EDILiveEditor() {
           <button
             onClick={() => setAutoRun(p => !p)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg font-mono"
-            style={{ background: autoRun ? C.emDim : "rgba(255,255,255,0.05)", border: `1px solid ${autoRun ? `${C.em}40` : C.border}`, color: autoRun ? C.em : C.muted, fontSize: "0.7rem", fontWeight: 700 }}
+            style={{ background: autoRun ? C.emDim : inactiveBtnBg, border: `1px solid ${autoRun ? `${C.em}40` : C.border}`, color: autoRun ? C.em : C.muted, fontSize: "0.7rem", fontWeight: 700 }}
           >
             <RefreshCw className="w-3 h-3" /> LIVE PARSE {autoRun ? "ON" : "OFF"}
           </button>
@@ -805,7 +894,7 @@ export function EDILiveEditor() {
           <button
             onClick={() => setShowHighlight(p => !p)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg"
-            style={{ background: showHighlight ? "rgba(59,130,246,0.1)" : "rgba(255,255,255,0.05)", border: `1px solid ${showHighlight ? `${C.info}40` : C.border}`, color: showHighlight ? C.info : C.muted, fontSize: "0.7rem", fontWeight: 700 }}
+            style={{ background: showHighlight ? "rgba(59,130,246,0.1)" : inactiveBtnBg, border: `1px solid ${showHighlight ? `${C.info}40` : C.border}`, color: showHighlight ? C.info : C.muted, fontSize: "0.7rem", fontWeight: 700 }}
           >
             {showHighlight ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
             <span className="font-mono">HIGHLIGHT</span>
@@ -816,7 +905,7 @@ export function EDILiveEditor() {
             onClick={() => runParse(content)}
             disabled={isParsing}
             className="flex items-center gap-2 px-4 py-2 rounded-lg"
-            style={{ background: isParsing ? "rgba(255,255,255,0.05)" : C.em, color: isParsing ? C.muted : "#fff", fontWeight: 700, fontSize: "0.75rem", boxShadow: isParsing ? "none" : `0 0 16px ${C.emGlow}` }}
+            style={{ background: isParsing ? inactiveBtnBg : C.em, color: isParsing ? C.muted : "#fff", fontWeight: 700, fontSize: "0.75rem", boxShadow: isParsing ? "none" : `0 0 16px ${C.emGlow}` }}
           >
             <Play className="w-3.5 h-3.5" /> {isParsing ? "Parsing…" : "Run Parse"}
           </button>
@@ -824,7 +913,7 @@ export function EDILiveEditor() {
       </div>
 
       {/* ── Status bar (below toolbar) ── */}
-      <div className="flex items-center gap-4 px-5 py-2 flex-shrink-0" style={{ borderBottom: `1px solid ${C.border}`, background: "rgba(0,0,0,0.4)" }}>
+      <div className="flex items-center gap-4 px-5 py-2 flex-shrink-0" style={{ borderBottom: `1px solid ${C.glassBorder}`, background: C.glassBg }}>
         <div className="flex items-center gap-1.5 font-mono">
           <Hash className="w-3 h-3" style={{ color: C.muted }} />
           <span style={{ color: C.muted, fontSize: "0.65rem" }}>{lineCount} lines</span>
@@ -879,10 +968,10 @@ export function EDILiveEditor() {
       <div className="flex flex-1 min-h-0">
 
         {/* ─── Editor pane (left 60%) ─── */}
-        <div className="flex flex-col" style={{ flex: "0 0 60%", borderRight: `1px solid ${C.border}`, minWidth: 0 }}>
+        <div className="flex flex-col" style={{ flex: "0 0 60%", borderRight: `1px solid ${C.glassBorder}`, minWidth: 0 }}>
 
           {/* Editor header */}
-          <div className="flex items-center justify-between px-4 py-2.5 flex-shrink-0" style={{ borderBottom: `1px solid ${C.border}`, background: "rgba(255,255,255,0.02)" }}>
+          <div className="flex items-center justify-between px-4 py-2.5 flex-shrink-0" style={{ borderBottom: `1px solid ${C.glassBorder}`, background: C.glassBg }}>
             <div className="flex items-center gap-2">
               <FileCode2 className="w-3.5 h-3.5" style={{ color: C.em }} />
               <span className="font-mono" style={{ color: C.sub, fontSize: "0.7rem" }}>
@@ -893,20 +982,20 @@ export function EDILiveEditor() {
               <button
                 onClick={() => { setContent(""); setParseResult(null); }}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono"
-                style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}`, color: C.muted, fontSize: "0.65rem" }}
+                style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.muted, fontSize: "0.65rem" }}
               >
                 <RotateCcw className="w-3 h-3" /> Clear
               </button>
               <button
                 onClick={() => navigator.clipboard.writeText(content).catch(() => {})}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono"
-                style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}`, color: C.muted, fontSize: "0.65rem" }}
+                style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.muted, fontSize: "0.65rem" }}
               >
                 <Copy className="w-3 h-3" /> Copy
               </button>
               <button
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono"
-                style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}`, color: C.muted, fontSize: "0.65rem" }}
+                style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, color: C.muted, fontSize: "0.65rem" }}
               >
                 <Download className="w-3 h-3" /> Save
               </button>
@@ -914,16 +1003,17 @@ export function EDILiveEditor() {
           </div>
 
           {/* Editor body */}
-          <div className="flex flex-1 min-h-0 overflow-hidden relative" style={{ background: "#060C17" }}>
+          <div className="flex flex-1 min-h-0 overflow-hidden relative" style={{ background: editorBg, contain: "layout style", willChange: "transform" }}>
             {/* Line numbers */}
             <div
               className="select-none flex-shrink-0 overflow-hidden"
-              style={{ width: 52, background: "rgba(0,0,0,0.3)", borderRight: `1px solid ${C.border}`, paddingTop: 12 }}
+              style={{ width: 52, background: gutterBg, borderRight: `1px solid ${C.glassBorder}`, paddingTop: 12 }}
             >
               {Array.from({ length: lineCount }, (_, i) => {
                 const lineNum = i + 1;
-                const hasErr = parseResult?.errors.some(e => e.lineNumber === lineNum && e.severity === "error");
-                const hasWarn = parseResult?.errors.some(e => e.lineNumber === lineNum && e.severity === "warning");
+                const lineSev = errLineMap.get(lineNum);
+                const hasErr  = lineSev === "error";
+                const hasWarn = lineSev === "warning";
                 return (
                   <div
                     key={lineNum}
@@ -976,7 +1066,7 @@ export function EDILiveEditor() {
                 className="absolute inset-0 w-full h-full resize-none outline-none font-mono"
                 style={{
                   background: "transparent",
-                  color: showHighlight ? "transparent" : "#94A3B8",
+                  color: showHighlight ? "transparent" : textareaColor,
                   caretColor: C.em,
                   padding: "12px 12px",
                   fontSize: "0.775rem",
@@ -993,13 +1083,13 @@ export function EDILiveEditor() {
 
           {/* Error gutter (bottom of editor) — inline error messages */}
           {parseResult && errCount + warnCount > 0 && (
-            <div className="flex-shrink-0 overflow-auto" style={{ maxHeight: 120, borderTop: `1px solid ${C.border}`, background: "rgba(0,0,0,0.6)" }}>
+            <div className="flex-shrink-0 overflow-auto" style={{ maxHeight: 120, borderTop: `1px solid ${C.glassBorder}`, background: errGutterBg }}>
               {parseResult.errors.slice(0, 8).map(err => (
                 <button
                   key={err.id}
                   onClick={() => { setSelectedErrorId(err.id); setActivePanel("errors"); scrollToLine(err.lineNumber); }}
                   className="w-full flex items-center gap-2 px-4 py-1.5 text-left transition-all hover:bg-white/[0.03]"
-                  style={{ borderBottom: `1px solid ${C.border}` }}
+                  style={{ borderBottom: `1px solid ${C.glassBorder}` }}
                 >
                   {err.severity === "error"
                     ? <AlertCircle className="w-3 h-3 flex-shrink-0" style={{ color: C.err }} />
@@ -1016,7 +1106,7 @@ export function EDILiveEditor() {
         {/* ─── Right panel (40%) ─── */}
         <div className="flex flex-col" style={{ flex: "0 0 40%", minWidth: 0 }}>
           {/* Panel tabs */}
-          <div className="flex items-center gap-0 flex-shrink-0" style={{ borderBottom: `1px solid ${C.border}`, background: "rgba(8,14,26,0.9)" }}>
+          <div className="flex items-center gap-0 flex-shrink-0" style={{ borderBottom: `1px solid ${C.glassBorder}`, background: rightTabBg }}>
             {([
               { id: "errors" as const, label: "Errors & Warnings", icon: AlertCircle, badge: errCount + warnCount },
               { id: "tree" as const, label: "Segment Tree", icon: Layers, badge: parseResult?.segmentCount },
@@ -1048,7 +1138,7 @@ export function EDILiveEditor() {
               ) : parseResult.errors.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center gap-3">
                   <CheckCircle2 className="w-12 h-12" style={{ color: C.em, filter: `drop-shadow(0 0 12px ${C.emGlow})` }} />
-                  <div style={{ color: C.em, fontWeight: 700, fontSize: "0.95rem" }}>No errors detected</div>
+                  <div style={{ color: C.em, fontWeight: 700, fontSize: "0.95rem", textShadow: `0 0 8px ${C.emGlow}, 0 0 20px ${C.emGlow}` }}>No errors detected</div>
                   <p style={{ color: C.muted, fontSize: "0.75rem", textAlign: "center", maxWidth: 200 }}>
                     EDI content passed all validation rules. File is ready for transmission.
                   </p>
@@ -1072,11 +1162,11 @@ export function EDILiveEditor() {
                       </div>
                       <p style={{ color: C.text, fontSize: "0.75rem", lineHeight: 1.5, marginBottom: 8 }}>{selectedError.message}</p>
                       <div className="grid grid-cols-2 gap-2 mb-3">
-                        <div className="p-2 rounded-lg" style={{ background: "rgba(0,0,0,0.3)", border: `1px solid ${C.border}` }}>
+                        <div className="p-2 rounded-lg" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}` }}>
                           <div className="font-mono mb-0.5" style={{ color: C.muted, fontSize: "0.57rem", letterSpacing: "0.08em" }}>EXPECTED</div>
                           <div className="font-mono" style={{ color: C.em, fontSize: "0.7rem", wordBreak: "break-word" }}>{selectedError.expected}</div>
                         </div>
-                        <div className="p-2 rounded-lg" style={{ background: "rgba(0,0,0,0.3)", border: `1px solid ${C.border}` }}>
+                        <div className="p-2 rounded-lg" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}` }}>
                           <div className="font-mono mb-0.5" style={{ color: C.muted, fontSize: "0.57rem", letterSpacing: "0.08em" }}>ACTUAL</div>
                           <div className="font-mono" style={{ color: C.err, fontSize: "0.7rem", wordBreak: "break-word" }}>{selectedError.actual}</div>
                         </div>
@@ -1092,14 +1182,14 @@ export function EDILiveEditor() {
                   )}
 
                   {/* Error list */}
-                  <div className="flex-1 overflow-auto">
+                  <div className="flex-1 overflow-auto" style={{ contain: "layout style", willChange: "transform" }}>
                     {parseResult.errors.map(err => (
                       <button
                         key={err.id}
                         onClick={() => { setSelectedErrorId(err.id === selectedErrorId ? null : err.id); scrollToLine(err.lineNumber); }}
                         className="w-full text-left px-4 py-3 transition-all hover:bg-white/[0.025] group"
                         style={{
-                          borderBottom: `1px solid ${C.border}`,
+                          borderBottom: `1px solid ${C.glassBorder}`,
                           background: selectedErrorId === err.id
                             ? err.severity === "error" ? `${C.err}08` : `${C.warn}08`
                             : "transparent",
@@ -1125,7 +1215,7 @@ export function EDILiveEditor() {
 
           {/* ── Segment Tree panel ── */}
           {activePanel === "tree" && (
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-auto" style={{ contain: "layout style", willChange: "transform" }}>
               {!parseResult ? (
                 <div className="flex-1 flex items-center justify-center p-8" style={{ color: C.muted, fontSize: "0.78rem" }}>Run parse to see segment tree</div>
               ) : (
@@ -1195,7 +1285,7 @@ export function EDILiveEditor() {
                         </button>
 
                         {expanded && (
-                          <div className="ml-4 mb-1 p-2 rounded-lg" style={{ background: "rgba(0,0,0,0.3)", border: `1px solid ${C.border}` }}>
+                          <div className="ml-4 mb-1 p-2 rounded-lg" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}` }}>
                             {/* Raw */}
                             <div className="font-mono mb-2 text-xs overflow-x-auto" style={{ color: "#34D399", fontSize: "0.67rem", lineHeight: 1.5, whiteSpace: "pre" }}>
                               {seg.raw.substring(0, 120)}{seg.raw.length > 120 ? "…" : ""}
@@ -1232,14 +1322,14 @@ export function EDILiveEditor() {
 
           {/* ── Parse Log panel ── */}
           {activePanel === "console" && (
-            <div className="flex-1 overflow-auto p-4" style={{ background: "rgba(0,0,0,0.5)" }}>
+            <div className="flex-1 overflow-auto p-4" style={{ background: consoleBg, contain: "layout style", willChange: "transform" }}>
               <div className="font-mono mb-4" style={{ color: C.em, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em" }}>PARSE HISTORY (last 10)</div>
               {parseHistory.length === 0 ? (
                 <p style={{ color: C.muted, fontSize: "0.75rem" }}>No parse runs yet. Make an edit or click Run Parse.</p>
               ) : (
                 <div className="space-y-2">
                   {parseHistory.map((h, i) => (
-                    <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
+                    <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}` }}>
                       <span className="font-mono" style={{ color: C.muted, fontSize: "0.65rem", minWidth: 70 }}>{h.ts}</span>
                       <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: h.errors > 0 ? C.err : C.em }} />
                       <span className="font-mono" style={{ color: h.errors > 0 ? C.err : C.em, fontSize: "0.65rem", fontWeight: 700, minWidth: 60 }}>
@@ -1265,7 +1355,7 @@ export function EDILiveEditor() {
                       { label: "File Valid", value: parseResult.isValid ? "YES" : "NO", color: parseResult.isValid ? C.em : C.err },
                       { label: "Line Count", value: lineCount, color: C.sub },
                     ].map(m => (
-                      <div key={m.label} className="p-3 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
+                      <div key={m.label} className="p-3 rounded-lg" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}` }}>
                         <div style={{ color: C.muted, fontSize: "0.6rem", marginBottom: 2 }}>{m.label}</div>
                         <div className="font-mono" style={{ color: m.color, fontSize: "0.9rem", fontWeight: 800 }}>{m.value}</div>
                       </div>
@@ -1274,7 +1364,7 @@ export function EDILiveEditor() {
                 </div>
               )}
 
-              <div className="mt-5 p-3 rounded-lg" style={{ background: "rgba(0,0,0,0.6)", border: `1px solid ${C.em}15` }}>
+              <div className="mt-5 p-3 rounded-lg" style={{ background: engineBg, border: `1px solid rgba(16,185,129,0.18)` }}>
                 <div className="font-mono mb-2" style={{ color: C.em, fontSize: "0.62rem", fontWeight: 700 }}>PARSE ENGINE</div>
                 <div className="space-y-1">
                   {[

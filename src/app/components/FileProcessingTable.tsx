@@ -12,11 +12,11 @@ interface ProcessedFile {
 }
 
 const C = {
-  bg: "var(--c-bg)", surface: "var(--c-surface)", border: "var(--c-border)",
-  borderMed: "var(--c-border-med)",
-  cardSubtle: "var(--c-card-subtle)", iconInactive: "var(--c-icon-inactive)", subtle: "var(--c-subtle)",
+  bg: "var(--c-bg)", surface: "var(--c-surface)",
   em: "#10B981", emDim: "rgba(16,185,129,0.12)", text: "var(--c-text)",
-  sub: "var(--c-sub)", muted: "var(--c-muted)", err: "#EF4444", warn: "#F59E0B", info: "#3B82F6",
+  sub: "var(--c-sub)", muted: "var(--c-muted)", err: "#EF4444", warn: "#F59E0B",
+  glassBg: "var(--c-glass-bg)", glassBorder: "var(--c-glass-border)",
+  border: "var(--c-border)", cardSubtle: "var(--c-card-subtle)",
 };
 
 const files: ProcessedFile[] = [
@@ -32,7 +32,7 @@ function StageChip({ status }: { status: string }) {
   const cfg =
     status === "passed" ? { bg: `${C.em}12`, color: C.em, border: `${C.em}30` } :
     status === "failed" ? { bg: `${C.err}12`, color: C.err, border: `${C.err}30` } :
-    { bg: C.subtle, color: C.muted, border: C.borderMed ?? C.border };
+    { bg: C.glassBg, color: C.muted, border: C.glassBorder };
   return (
     <span className="font-mono uppercase px-2.5 py-1 rounded-lg" style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}`, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.08em" }}>
       {status}
@@ -48,9 +48,9 @@ export function FileProcessingTable() {
   const failed = files.filter(f => f.status === "failed").length;
 
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: C.surface, border: `1px solid ${C.border}`, backdropFilter: "blur(12px)" }}>
+    <div className="rounded-2xl overflow-hidden" style={{ background: C.surface, border: `1px solid ${C.glassBorder}`, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}>
       {/* Header */}
-      <div className="px-6 py-5" style={{ borderBottom: `1px solid ${C.border}` }}>
+      <div className="px-6 py-5" style={{ borderBottom: `1px solid ${C.glassBorder}` }}>
         <div className="flex items-center justify-between">
           <div>
             <div style={{ color: C.text, fontSize: "1rem", fontWeight: 700 }}>File Processing Details</div>
@@ -72,7 +72,7 @@ export function FileProcessingTable() {
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr style={{ background: C.cardSubtle, borderBottom: `1px solid ${C.border}` }}>
+            <tr style={{ background: C.glassBg, borderBottom: `1px solid ${C.glassBorder}` }}>
               {["STATUS", "FILE NAME", "BATCH", "PROJECT", "RECEIVED", "DURATION", "RECORDS", ""].map((h, i) => (
                 <th key={i} className="text-left py-3.5 px-5 font-mono" style={{ color: C.muted, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em" }}>{h}</th>
               ))}
@@ -84,7 +84,7 @@ export function FileProcessingTable() {
                 <tr
                   onClick={() => toggle(file.id)}
                   className="cursor-pointer transition-all hover:bg-white/[0.025]"
-                  style={{ borderBottom: `1px solid ${C.border}`, background: expanded === file.id ? "rgba(16,185,129,0.03)" : undefined }}
+                  style={{ borderBottom: `1px solid ${C.glassBorder}`, background: expanded === file.id ? "rgba(16,185,129,0.03)" : undefined }}
                 >
                   <td className="py-4 px-5">
                     <div className="flex items-center gap-2">
@@ -115,11 +115,11 @@ export function FileProcessingTable() {
                 </tr>
 
                 {expanded === file.id && (
-                  <tr key={`${file.id}-detail`} style={{ background: C.cardSubtle }}>
+                  <tr key={`${file.id}-detail`} style={{ background: C.glassBg }}>
                     <td colSpan={8} className="px-5 py-5">
                       <div className="grid grid-cols-3 gap-4">
                         {/* File info */}
-                        <div className="p-4 rounded-xl" style={{ background: C.iconInactive, border: `1px solid ${C.border}` }}>
+                        <div className="p-4 rounded-xl" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, backdropFilter: "blur(12px)" }}>
                           <div className="font-mono mb-3" style={{ color: C.em, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em" }}>FILE INFORMATION</div>
                           <div className="space-y-3">
                             {[
@@ -136,7 +136,7 @@ export function FileProcessingTable() {
                         </div>
 
                         {/* Processing stages */}
-                        <div className="p-4 rounded-xl" style={{ background: C.iconInactive, border: `1px solid ${C.border}` }}>
+                        <div className="p-4 rounded-xl" style={{ background: C.glassBg, border: `1px solid ${C.glassBorder}`, backdropFilter: "blur(12px)" }}>
                           <div className="font-mono mb-3" style={{ color: C.em, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em" }}>PROCESSING STAGES</div>
                           <div className="space-y-3">
                             {[
@@ -179,8 +179,8 @@ export function FileProcessingTable() {
                               <div className="flex items-center gap-2 font-mono mb-3" style={{ color: C.em, fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em" }}>
                                 <CheckCircle2 className="w-3.5 h-3.5" /> OUTPUT PATH
                               </div>
-                              <div className="p-3 rounded-lg mb-3" style={{ background: "rgba(0,0,0,0.3)", border: `1px solid ${C.em}20` }}>
-                                <p className="font-mono break-all" style={{ color: "#34D399", fontSize: "0.7rem", lineHeight: 1.6 }}>{file.outputPath}</p>
+                              <div className="p-3 rounded-lg mb-3" style={{ background: C.cardSubtle, border: `1px solid ${C.border}` }}>
+                                <p className="font-mono break-all" style={{ color: C.em, fontSize: "0.7rem", lineHeight: 1.6 }}>{file.outputPath}</p>
                               </div>
                               <button
                                 className="w-full py-2 rounded-lg flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"

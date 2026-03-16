@@ -4,6 +4,12 @@
   --font-size: 16px;
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
+  /* Emerald Glass Ops tokens */
+  --emerald: #10B981;
+  --emerald-glow: rgba(16,185,129,0.35);
+  --glass-bg: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.15);
+  --radius-glass: 24px;
   --card: #ffffff;
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -189,3 +195,24 @@
     line-height: 1.5;
   }
 }
+
+/* ── Emerald Glass Ops — global utilities ── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes em-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(16,185,129,0.3); }
+  50%       { box-shadow: 0 0 20px rgba(16,185,129,0.6); }
+}
+
+/* scrollbar theming */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16,185,129,0.22) transparent;
+}
+*::-webkit-scrollbar { width: 5px; height: 5px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(16,185,129,0.22); border-radius: 99px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(16,185,129,0.40); }
