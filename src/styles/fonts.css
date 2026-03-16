@@ -1,0 +1,15 @@
+/* ── Default theme vars (dark) — overridden by ThemeProvider via JS ── */
+:root {
+  --c-bg: #080E1A;
+  --c-surface: rgba(15, 23, 42, 0.7);
+  --c-surface-hover: rgba(15, 23, 42, 0.9);
+  --c-sidebar: rgba(8, 14, 26, 0.95);
+  --c-card-subtle: rgba(255, 255, 255, 0.03);
+  --c-icon-inactive: rgba(255, 255, 255, 0.04);
+  --c-subtle: rgba(255, 255, 255, 0.05);
+  --c-border: rgba(255, 255, 255, 0.07);
+  --c-border-med: rgba(255, 255, 255, 0.12);
+  --c-text: #F1F5F9;
+  --c-sub: #94A3B8;
+  --c-muted: #475569;
+}
